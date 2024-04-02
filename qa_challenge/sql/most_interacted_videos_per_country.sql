@@ -1,20 +1,24 @@
 with _interactions as (
-    select country_code,
+    SELECT 
+        country_code,
         video_id,
-        sum(interaction_events) total_interactions
-    from viewership_data
-    group by 1, 2
-    having sum(interaction_events) >= 150
-), _ranking as (
-    select country_code,
+        SUM(interaction_events) AS total_interactions
+    FROM viewership_data
+    GROUP by 1, 2
+    HAVING SUM(interaction_events) >= 150
+), _ranking AS (
+    SELECT
+        country_code,
         video_id,
         total_interactions,
-        row_number() over (partition by country_code order by total_interactions desc) _ranking_no
-    from _interactions
+        ROW_NUMBER() OVER (PARTITION BY country_code ORDER BY total_interactions DESC) AS rank
+    FROM _interactions
 )
-select country_code,
+SELECT 
+    country_code,
     video_id,
     total_interactions
-from _ranking
-where _ranking_no >= 2
-order by country_code
+FROM _ranking
+WHERE rank = 1
+ORDER BY country_code
+
